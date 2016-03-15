@@ -5,7 +5,7 @@ import groovy.json.*
 class ReportParser
 {
     // all field public for analyse inner job this tool.
-    def public OffsetEnd = 4    // raw response contains empty string symbol in the end, and we must cut this
+    def public OffsetEnd = 3    // raw response contains empty string symbol in the end, and we must cut this
     def public HeadersCount
     def public FieldsByStrings
     def public splitted = []
@@ -14,6 +14,29 @@ class ReportParser
     def public DetailsJsonArray
     def public mapJson = []
     def public rawCsvDetails = []
+
+    def parseCSVToString(rawResponse)
+    {
+        def trashSize = 6 // '\n'
+        def csvRows = []
+        def csvData = rawResponse.split('\r')
+        int index = csvData.findIndexOf(csvData.findIndexOf{it.size() == 1} + 1)
+                { it.size() == 1} + 1
+        for(int i = index; i < csvData.length; i++)
+        {
+            csvRows[i - index] = csvData[i].replace('\n','')
+        }
+
+        if(csvRows[0].split('\r').size() == 1)
+        {
+            csvRows = csvRows[1..csvRows.size() - 1]
+        }
+
+        //def csvString = csvRows.join(" ")
+
+        //return csvString[trashSize..csvString.length() - 1]
+        return csvRows
+    }
 
     def private ParseCsvToValisStrings(response)
     {
@@ -197,7 +220,7 @@ class ReportParser
 
             if(arg[i].contains("Before modification:") || arg[i].contains("After modification:"))
             {
-                mode = true
+                mode = 1
                 if(arg[i].contains("Before modification:"))
                 {
                     if(posBefore == -1){
@@ -262,7 +285,11 @@ class ReportParser
                                     }
                                     if(j > posBefore && j < posAfter)
                                     {
-                                        inner += fields[j] + ","
+                                        inner += fields[j]
+                                        if(j < posAfter - 1)
+                                        {
+                                            inner += ","
+                                        }
                                     }
                                     if(j == posAfter)
                                     {
@@ -270,13 +297,17 @@ class ReportParser
                                     }
                                     if(j > posAfter)
                                     {
-                                        inner += fields[j] + ","
+                                        inner += fields[j] /*+ ","*/
+                                        if(j < fields.size - 1)
+                                        {
+                                            inner += ","
+                                        }
                                     }
                                 }
                                 jsonstr += inner
                             }
                         }
-                        jsonstr += "}"
+                        jsonstr += "}}"
                     }
                 }
                 if(mode == 2)   // field and value separated by ':' but value is object
@@ -373,7 +404,7 @@ class ReportParser
         def a4 =  a3.replaceAll("\\\\\"", '"').replaceAll("\"\\\\", '"')        // CHANGE \{  {  AND }/ }
         def a5 =  a4.replaceAll('""', '"')                                      // CHANGE ""  "
         def a6 =  '[' + a5.replaceAll('"""', '""').replaceAll('\\{\"\\}', '""}').replaceAll("\\\\", ' ') + ']'
-        def a7 =  a6.replaceAll("t u043F u00BB u0457","") // remove symbol 'red dot'. From this symbol beginning all strings
+        def a7 =  a6.replaceAll("t u00EF u00BB u00BF","") // remove symbol 'red dot'. From this symbol beginning all strings
 
         return a7
     }
@@ -396,13 +427,29 @@ class ReportParser
 
         return result
     }
+
+    def ParseResponseWithSimpleCsv(rawResponse)
+    {
+        def data = this.parseCSVToString(rawResponse)
+        this.csvArray = data
+        def i = 0
+
+        for(item in data)
+        {
+            this.compose[i] = item.split(',')
+            i++
+        }
+
+        def jsonString = this.CreateJson(data)
+
+        String output = JsonOutput.toJson(jsonString)
+
+        return output
+    }
 }
 
-def rawResponse = new File('C:/Users/Maksim_Pitkevich/Desktop/Andrey/AllEvents.txt').text
+/*def rawResponse = new File('C:/Users/Maksim_Pitkevich/Desktop/Andrey/AllEvents.txt').text
 ReportParser a =  new ReportParser()
 def jsonString = a.ParseCsvWithDetails(rawResponse)
 def jsonMap = new JsonSlurper().parseText(jsonString)
-def g = jsonMap['Details'][0]
-
-
-
+def g = jsonMap['Details'][0]*/
