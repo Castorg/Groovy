@@ -6,15 +6,13 @@
         public int Stars { get; set; }
         public virtual List<RoomEntity> Rooms { get; set; }
         public virtual NotPrimaryServicesEntity NotPrimaryServices { get; set; }
-
+        public virtual ParkingEntity NearParking { get; set; }
     }
 
     public class ParkingEntity
     {
         public int CountPlaces { get; set; }
-
         public string Address { get; set; }
-
         public decimal BasicCostPerQuantum { get; set; }
     }
 
@@ -31,9 +29,7 @@
     public class NotPrimaryServicesEntity : BaseEntity
     {
         public virtual List<ExcursionEntity> Excursions { get; set; }
-
         public virtual FoodServiceEntity FoodServices { get; set; }
-
         public virtual CleaningServieEntity ccc { get; set; }
     }
 
@@ -52,12 +48,29 @@
         public decimal BasicCostPerQuantum { get; set; }
         public virtual ParkingEntity NearParking { get; set; }
     }
+    
+    public class WorkTime
+    {
+        WorkTime()
+        {
+            this.WorkDays = new List<DayOfWeek>();
+            this.WeekEndDays = new List<DayOfWeek>();
+        }
+        public List<DayOfWeek> WorkDays { get; set; }
+        public List<DayOfWeek> WeekEndDays { get; set; }
+    }
 
     public class ExcursionEntity : BaseEntity
     {
         public string ExcursionName { get; set; }
 
         public decimal BasicCostPerQuantum { get; set; }
+        
+        public string StartTime { get; set; }
+        
+        public string Duration { get; set; }
+        
+        public WorkTime WorkTime { get; set; }
 
     }
 
@@ -81,6 +94,11 @@
         public string BookingState { get; set; }
         public DateTime StartBookingTime { get; set; }
         public DateTime EndBookingTime { get; set; }
+    }
+    
+    public class VirtualUserWalletEntity
+    {
+        
     }
 
     public enum RoomState
