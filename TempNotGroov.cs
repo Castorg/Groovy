@@ -137,3 +137,8 @@
         public List<DayOfWeek> WorkDays { get; set; }
         public List<DayOfWeek> WeekEndDays { get; set; }
     }
+    
+    public interface IServiseClass
+    {
+         
+    }
